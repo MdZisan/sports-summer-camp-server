@@ -32,13 +32,26 @@ async function run() {
     const usersCollection = client.db('summer_camp').collection('users')
 
 
-
+// users 
 app.post('/users',async(req,res)=>{
   const user =  req.body;
   console.log(user);
   const result = await usersCollection.insertOne(user);
   res.send(result)
 })
+
+app.get('/users',async(req,res)=>{
+  let filter = {};
+  if(req.query.email){
+  filter = {email: req.query.email};
+  }
+  const result = await usersCollection.find(filter).toArray();
+  res.send(result)
+})
+
+
+
+//classes
 app.get('/classes',async(req,res)=>{
 
   const result = await classesCollection.find().toArray()
