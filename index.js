@@ -61,6 +61,9 @@ app.get('/users',async(req,res)=>{
   if(req.query.email){
   filter = {email: req.query.email};
   }
+  if(req.query.role){
+    filter ={role: req.query.role};
+  }
   const result = await usersCollection.find(filter).toArray();
   res.send(result)
 })
