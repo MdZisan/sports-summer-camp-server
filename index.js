@@ -11,7 +11,7 @@ app.use(express.json())
 
 // MongoDB
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.mcjrvhr.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -38,6 +38,22 @@ app.post('/users',async(req,res)=>{
   console.log(user);
   const result = await usersCollection.insertOne(user);
   res.send(result)
+})
+
+app.patch('/users/:id',async(req,res)=>{
+  const id = req.params.id;
+  const newRole= req.query.role;
+  const filter = {_id: new ObjectId(id)};
+  
+  const updateDoc= {
+    $set:{
+      role: newRole
+    }
+  }
+const result= await usersCollection.updateOne(filter,updateDoc);
+res.send(result)
+
+
 })
 
 app.get('/users',async(req,res)=>{
