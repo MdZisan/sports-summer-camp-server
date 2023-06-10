@@ -76,9 +76,44 @@ console.log(classes);
 
 
 })
-app.get('/classes',async(req,res)=>{
 
-  const result = await classesCollection.find().toArray()
+//class status update
+
+app.patch('/classes/:id',async(req,res)=>{
+  const id= req.params.id;
+  const status= req.query.status;
+  const filter = {_id: new ObjectId(id)}
+  console.log(id,status);
+  const updateDoc = {
+    $set:{
+        status: status,
+    }
+  }
+  const result = await classesCollection.updateOne(filter,updateDoc);
+  res.send(result)
+
+})
+
+app.put('/classes',async(req,res)=>{
+  const {id,feedback} = req.query;
+ const filter = {_id: new ObjectId(id)}
+ const updateDoc ={
+  $set:{
+    feedback: feedback
+  }
+ }
+ const result = await classesCollection.updateOne(filter,updateDoc)
+ res.send(result)
+  // console.log(id,feedback);
+  
+})
+
+app.get('/classes',async(req,res)=>{
+  let filter = {};
+  if(req.query.email){
+  filter = {instructorEmail: req.query.email};
+  }
+  const result = await classesCollection.find(filter).toArray()
   res.send(result)
 
 })
