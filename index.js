@@ -116,6 +116,9 @@ app.get('/classes',async(req,res)=>{
   if(req.query.email){
   filter = {instructorEmail: req.query.email};
   }
+  if(req.query.status){
+    filter = {status: req.query.status};
+  }
   const result = await classesCollection.find(filter).toArray()
   res.send(result)
 
