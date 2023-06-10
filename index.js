@@ -68,6 +68,14 @@ app.get('/users',async(req,res)=>{
 
 
 //classes
+app.post('/classes',async(req,res)=>{
+ const classes = req.body;
+console.log(classes);
+ const result= await classesCollection.insertOne(classes)
+ res.send(result)
+
+
+})
 app.get('/classes',async(req,res)=>{
 
   const result = await classesCollection.find().toArray()
