@@ -32,6 +32,7 @@ async function run() {
     const classesCollection = client.db('summer_camp').collection('classes')
     const usersCollection = client.db('summer_camp').collection('users')
     const selectedClassesCollection = client.db('summer_camp').collection('selectedClasses')
+    const paymentHistoryCollection = client.db('summer_camp').collection('paymentHistory')
 
 
 // users 
@@ -178,7 +179,41 @@ app.get('/classes',async(req,res)=>{
 })
 //payment
 app.post('/payment',async(req,res)=>{
-  console.log(req.body.allIDs);
+ 
+  const ids= req.body.allIDs;
+  const classIds =req.body.classId;
+  // const objIds = ids.map(id=> new ObjectId(id))
+  // console.log(objIds);
+  const selectedfilter = {
+    _id: {$in: ids.map(id=> new ObjectId(id))} 
+  };
+  const selectedClassesUpdateDoc = {
+    $set: {
+      classStatus: 'enrolled',
+    },
+    $inc: {
+      availableSeats: -1
+    }
+  };
+
+  const allClassFilter = {
+    _id: {$in: classIds.map(id=> new ObjectId(id))} 
+  };
+  const allClassesUpdateDoc = {
+   
+    $inc: {
+      availableSeats: -1
+    }
+  };
+
+
+  const selectedClassesUpdate = await selectedClassesCollection.updateMany(selectedfilter,selectedClassesUpdateDoc)
+  const allClassesUpdate = await classesCollection.updateMany(allClassFilter,allClassesUpdateDoc)
+   const paymentInfo = req.body;
+const result = await paymentHistoryCollection.insertOne(paymentInfo);
+
+res.send({selectedClassesUpdate,allClassesUpdate,paymenthistory:result})
+
 })
 
 
