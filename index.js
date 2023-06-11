@@ -1,13 +1,14 @@
 const express =  require('express');
 const app =  express();
-const cors = require('cors')
+const cors = require('cors');
 // const jwt = require('jsonwebtoken')
 const port =  process.env.PORT || 5000;
 require('dotenv').config()
-
+const stripe = require('stripe')(process.env.PAYMENT_SECRET_KEY);
 //middleware
 app.use(cors());
 app.use(express.json())
+
 
 // MongoDB
 
@@ -87,20 +88,31 @@ app.post('/selectedClass',async(req,res)=>{
   
   }
   else{
-    
     const selectedClasses = { ...req.body };
-    delete selectedClasses._id; // Remove the _id field
-    const result = await selectedClassesCollection.insertOne(selectedClasses);
-    res.send(result);
+  const classId = selectedClasses._id;
+  delete selectedClasses._id;
+  delete selectedClasses.status;
+  delete selectedClasses.feedback;
+  selectedClasses.classId = classId;
+  selectedClasses.classStatus= 'selected'
+
+  const result = await selectedClassesCollection.insertOne(selectedClasses);
+  res.send(result);
   }
 
 
 } )
+app.delete('/selectedClass/:id',async(req,res)=>{
+  const id= req.params.id;
+  const result= await selectedClassesCollection.deleteOne({_id: new ObjectId(id)})
+  res.send(result)
+
+})
 
 app.get('/selectedClass',async(req,res)=>{
   let filter = {};
   if(req.query.email){
-  filter = {studentEmail: req.query.email};
+  filter = {studentEmail: req.query.email,classStatus: req.query.classStatus};
   }
 
 
@@ -164,6 +176,27 @@ app.get('/classes',async(req,res)=>{
   res.send(result)
 
 })
+//payment
+app.post('/payment',async(req,res)=>{
+  console.log(req.body.allIDs);
+})
+
+
+app.post('/create-payment-intent', async (req, res) => {
+  const { price } = req.body;
+  const amount = price * 100;
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: amount,
+    currency: 'usd',
+    payment_method_types: ['card']
+  });
+
+  res.send({
+    clientSecret: paymentIntent.client_secret
+  })
+})
+
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
