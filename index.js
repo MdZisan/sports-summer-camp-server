@@ -30,6 +30,7 @@ async function run() {
 
     const classesCollection = client.db('summer_camp').collection('classes')
     const usersCollection = client.db('summer_camp').collection('users')
+    const selectedClassesCollection = client.db('summer_camp').collection('selectedClasses')
 
 
 // users 
@@ -73,12 +74,45 @@ app.get('/users',async(req,res)=>{
   res.send(result)
 })
 
+//selectedClasses
 
+app.post('/selectedClass',async(req,res)=>{
+  // console.log(req.body);
+  const existedFilter =  {studentEmail: req.body.studentEmail,name: req.body.name}
+ 
+  const existedClass = await selectedClassesCollection.findOne(existedFilter)
+  
+  if(existedClass){
+    return res.send('already selected');
+  
+  }
+  else{
+    
+    const selectedClasses = { ...req.body };
+    delete selectedClasses._id; // Remove the _id field
+    const result = await selectedClassesCollection.insertOne(selectedClasses);
+    res.send(result);
+  }
+
+
+} )
+
+app.get('/selectedClass',async(req,res)=>{
+  let filter = {};
+  if(req.query.email){
+  filter = {studentEmail: req.query.email};
+  }
+
+
+  const result=  await selectedClassesCollection.find(filter).toArray();
+  res.send(result)
+
+})
 
 //classes
 app.post('/classes',async(req,res)=>{
  const classes = req.body;
-console.log(classes);
+// console.log(classes);
  const result= await classesCollection.insertOne(classes)
  res.send(result)
 
@@ -102,6 +136,7 @@ app.patch('/classes/:id',async(req,res)=>{
 
 })
 
+//class feed back 
 app.put('/classes',async(req,res)=>{
   const {id,feedback} = req.query;
  const filter = {_id: new ObjectId(id)}
@@ -116,6 +151,7 @@ app.put('/classes',async(req,res)=>{
   
 })
 
+//classes to frontend
 app.get('/classes',async(req,res)=>{
   let filter = {};
   if(req.query.email){
