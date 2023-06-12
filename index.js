@@ -99,6 +99,11 @@ app.get('/users',verifyJWT,async(req,res)=>{
   res.send(result)
 })
 
+app.get('/insUsers',async(req,res)=>{
+  const result= await usersCollection.find({role: 'instructor'}).toArray()
+  res.send(result)
+})
+
 //selectedClasses
 
 app.post('/selectedClass',async(req,res)=>{
